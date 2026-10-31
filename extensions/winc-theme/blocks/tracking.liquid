@@ -1,0 +1,26 @@
+{% comment %}
+  Installation is merchant-controlled through the theme editor. Disabled by default.
+  Never place credentials in theme settings or storefront HTML.
+{% endcomment %}
+{% if block.settings.enabled and block.settings.endpoint != blank %}
+  <div
+    id="winc-tracking-config"
+    hidden
+    data-endpoint="{{ block.settings.endpoint | escape }}"
+    data-site-key="{{ block.settings.site_key | escape }}"
+    data-customer-hint="{{ customer.id | escape }}"
+  ></div>
+{% endif %}
+{% schema %}
+{
+  "name": "Win C tracking",
+  "target": "body",
+  "javascript": "winc-sdk.js",
+  "settings": [
+    {"type": "paragraph", "content": "Development scaffold. Enable only after configuring your collector and privacy controls. No data is sent until analytics processing is allowed."},
+    {"type": "checkbox", "id": "enabled", "label": "Enable tracking", "default": false},
+    {"type": "url", "id": "endpoint", "label": "Collector HTTPS URL"},
+    {"type": "text", "id": "site_key", "label": "Public site key", "info": "A public routing identifier, never a secret."}
+  ]
+}
+{% endschema %}

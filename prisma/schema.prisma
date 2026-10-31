@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// Every application record is scoped to the authenticated merchant shop.
+model Contact {
+  id         String           @id @default(cuid())
+  shop       String
+  externalId String?
+  name       String?
+  email      String?
+  firstSeen  DateTime         @default(now())
+  lastSeen   DateTime         @default(now())
+  sessions   VisitSession[]
+  attributes AttributeValue[]
+
+  @@unique([shop, id])
+  @@unique([shop, externalId])
+  @@index([shop, lastSeen])
+}
+
+model VisitSession {
+  id        String          @id @default(cuid())
+  shop      String
+  contactId String
+  contact   Contact         @relation(fields: [shop, contactId], references: [shop, id], onDelete: Cascade)
+  startedAt DateTime        @default(now())
+  endedAt   DateTime?
+  events    ActivityEvent[]
+
+  @@unique([shop, id])
+  @@index([shop, contactId, startedAt])
+}
+
+model ActivityEvent {
+  id         String       @id @default(cuid())
+  shop       String
+  sessionId  String
+  session    VisitSession @relation(fields: [shop, sessionId], references: [shop, id], onDelete: Cascade)
+  sourceId   String
+  kind       String
+  path       String?
+  occurredAt DateTime
+
+  @@unique([shop, sourceId])
+  @@index([shop, sessionId, occurredAt])
+}
+
+enum AttributeType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+}
+
+model AttributeDefinition {
+  id          String           @id @default(cuid())
+  shop        String
+  key         String
+  name        String
+  description String           @default("")
+  type        AttributeType
+  values      AttributeValue[]
+
+  @@unique([shop, id])
+  @@unique([shop, key])
+}
+
+model AttributeValue {
+  id           String              @id @default(cuid())
+  shop         String
+  contactId    String
+  definitionId String
+  contact      Contact             @relation(fields: [shop, contactId], references: [shop, id], onDelete: Cascade)
+  definition   AttributeDefinition @relation(fields: [shop, definitionId], references: [shop, id], onDelete: Cascade)
+  value        Json
+  updatedAt    DateTime            @updatedAt
+
+  @@unique([shop, contactId, definitionId])
+}

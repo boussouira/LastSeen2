@@ -1,0 +1,22 @@
+name = "Win C standard events"
+type = "web_pixel_extension"
+runtime_context = "strict"
+
+[customer_privacy]
+analytics = true
+marketing = false
+preferences = false
+sale_of_data = "disabled"
+
+[settings]
+type = "object"
+
+[settings.fields.endpoint]
+name = "Collector HTTPS URL"
+description = "Leave unset until the collector is configured and verified."
+type = "single_line_text_field"
+
+[settings.fields.siteKey]
+name = "Public site key"
+description = "Public routing identifier; not a secret or authentication credential."
+type = "single_line_text_field"
