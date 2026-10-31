@@ -7,6 +7,12 @@ import test from "node:test";
 
 const entrypoint = path.resolve("scripts/dev-entrypoint.sh");
 
+test("development image installs and checks ps for Shopify CLI process management", () => {
+  const containerfile = readFileSync("Containerfile.dev", "utf8").replace(/\\\n/g, " ");
+  assert.match(containerfile, /apt-get install[^&\n]*\bprocps\b/);
+  assert.match(containerfile, /&& command -v ps\s*&& ps --version/);
+});
+
 function fixture() {
   const cwd = mkdtempSync(path.join(os.tmpdir(), "compose-entrypoint-"));
   const bin = path.join(cwd, "bin");

@@ -124,9 +124,26 @@ name). Keep the directory/project name stable to reuse the same data. If using
 References: [Podman Compose provider behavior](https://docs.podman.io/en/latest/markdown/podman-compose.1.html),
 [Shopify app dev](https://shopify.dev/docs/api/shopify-cli/app/app-dev).
 
+## Troubleshooting: `Error: spawn ps ENOENT`
+
+Shopify CLI uses `ps` to inspect Linux child processes. The slim Node base image
+does not provide it; `Containerfile.dev` installs Debian's `procps` package and
+checks `ps` during the image build. If you built an older image, stop the app and
+rebuild before starting it again:
+
+```sh
+podman compose build app
+podman compose up -d db
+podman compose run --rm app
+```
+
+This preserves the named database and Shopify login volumes; do not delete them
+or reauthenticate just to fix a missing executable.
+
 ## Verification status (2026-10-31)
 
-The repository's 13 tests (including entrypoint dependency-cache, credential
+The repository's 14 tests (including the image's `ps` dependency declaration,
+entrypoint dependency-cache, credential
 encoding, install-failure, and database-retry tests), typecheck, lint, production
 build, shell syntax, and YAML parsing passed. The CLI config paths above were
 verified against the installed CLI 5.0.0 implementation using an isolated temporary
