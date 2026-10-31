@@ -1,0 +1,16 @@
+FROM docker.io/library/node:24-bookworm-slim
+
+# Pin the CLI so authentication storage and dev behavior are reproducible.
+ARG SHOPIFY_CLI_VERSION=5.0.0
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates git openssl postgresql-client \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install --global "@shopify/cli@${SHOPIFY_CLI_VERSION}" \
+    && npm cache clean --force
+
+WORKDIR /app
+# Source, credentials and .git are not copied into this development image.
+COPY scripts/dev-entrypoint.sh /usr/local/bin/dev-entrypoint
+RUN chmod 755 /usr/local/bin/dev-entrypoint
+ENTRYPOINT ["/usr/local/bin/dev-entrypoint"]
+CMD ["npm", "run", "dev"]

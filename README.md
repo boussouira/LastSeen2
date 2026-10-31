@@ -2,6 +2,8 @@
 
 Start with [implementation and setup](docs/IMPLEMENTATION.md), [tracking design](docs/tracking.md), and [verification](docs/VERIFICATION.md). The name is provisional. This is an initial scaffold, not a live tracking service or Shopify certification.
 
+For containerized local development, see [Podman Compose setup](docs/podman-development.md) (Shopify CLI + persistent authentication + PostgreSQL).
+
 ---
 
 # Shopify App Template - React Router

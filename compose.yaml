@@ -1,0 +1,51 @@
+# Development only. Run rootless; see docs/podman-development.md.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile.dev
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    environment:
+      NODE_ENV: development
+      HOME: /root
+      XDG_CONFIG_HOME: /root/.config
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: winc
+      POSTGRES_USER: winc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env; see docs/podman-development.md}
+    volumes:
+      - .:/app:z
+      - node_modules:/app/node_modules
+      - shopify_project:/app/.shopify
+      - shopify_config:/root/.config
+      - npm_cache:/root/.npm
+    depends_on:
+      db:
+        condition: service_healthy
+    # Shopify CLI's tunnel reaches the app inside this container. No app or
+    # database host ports are needed; open the printed HTTPS preview URL.
+
+  db:
+    image: docker.io/library/postgres:16-bookworm
+    environment:
+      POSTGRES_DB: winc
+      POSTGRES_USER: winc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env; see docs/podman-development.md}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  postgres_data:
+  node_modules:
+  shopify_project:
+  shopify_config:
+  npm_cache:

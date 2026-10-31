@@ -1,3 +1,15 @@
-.cache
-build
+.git
+.github
+.env
+.env.*
+!.env.example
+.shopify
+.shopify.lock
 node_modules
+.cache
+.react-router
+build
+coverage
+*.log
+*.pem
+*.key
